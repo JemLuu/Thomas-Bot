@@ -1,0 +1,31 @@
+{
+  "name": "thomas-bot",
+  "version": "1.0.0",
+  "description": "A GroupMe bot that sends scheduled messages on Tuesdays, Thursdays, and Fridays",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "groupme",
+    "bot",
+    "scheduler",
+    "automated-messages"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-cron": "^3.0.3",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "winston": "^3.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -1,0 +1,115 @@
+name: Send GroupMe Messages
+
+on:
+  schedule:
+    # Runs at random times between 12:00 PM and 3:00 PM EST on Tuesday, Thursday, Friday
+    # We'll run at 12:00 PM EST (5:00 PM UTC) and pick a random delay
+    - cron: '0 17 * * 2,4,5'
+    # Saturday test message at 3:30 PM EST (8:30 PM UTC)
+    - cron: '30 20 * * 6'
+  
+  # Allows manual triggering from the Actions tab
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Custom message to send (optional)'
+        required: false
+        default: ''
+
+jobs:
+  send-message:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Send scheduled message
+      env:
+        GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
+      run: |
+        # Array of messages to rotate through
+        messages=(
+          "Happy Tuesday! 🎉 Let's make today productive and positive!"
+          "Thursday vibes! 💪 You're doing great, keep pushing forward!"
+          "It's Friday! 🎊 Almost weekend - finish strong!"
+          "Good morning! ☀️ Today is full of possibilities!"
+          "Rise and shine! 🌟 Let's conquer the day together!"
+          "Another beautiful day to achieve greatness! 🚀"
+          "Hey team! 👋 Hope everyone has an amazing day!"
+          "Midweek motivation! 💫 You've got this!"
+          "Happy Friday! 🥳 Weekend is almost here!"
+          "Tuesday energy! ⚡ Let's tackle those goals!"
+        )
+        
+        # Get day of week (2=Tuesday, 4=Thursday, 5=Friday, 6=Saturday)
+        day_of_week=$(date +%u)
+        
+        # For Tuesday, Thursday, Friday - add random delay between 0-3 hours
+        if [ "$day_of_week" -eq 2 ] || [ "$day_of_week" -eq 4 ] || [ "$day_of_week" -eq 5 ]; then
+          # Generate random delay in seconds (0 to 10800 seconds = 0 to 3 hours)
+          random_delay=$((RANDOM % 10800))
+          echo "Waiting $random_delay seconds ($(($random_delay / 60)) minutes) for random scheduling..."
+          sleep $random_delay
+        fi
+        
+        # Select message based on day
+        if [ "$day_of_week" -eq 2 ]; then
+          # Tuesday messages
+          random_index=$((RANDOM % ${#messages[@]}))
+          message="${messages[$random_index]}"
+        elif [ "$day_of_week" -eq 4 ]; then
+          # Thursday messages
+          random_index=$((RANDOM % ${#messages[@]}))
+          message="${messages[$random_index]}"
+        elif [ "$day_of_week" -eq 5 ]; then
+          # Friday messages
+          random_index=$((RANDOM % ${#messages[@]}))
+          message="${messages[$random_index]}"
+        elif [ "$day_of_week" -eq 6 ]; then
+          # Saturday test message
+          message="Saturday test message! 🧪 Bot is working correctly!"
+        else
+          # Default message (for manual runs)
+          # Use custom message if provided, otherwise use a random one
+          if [ -n "${{ github.event.inputs.message }}" ]; then
+            message="${{ github.event.inputs.message }}"
+          else
+            random_index=$((RANDOM % ${#messages[@]}))
+            message="${messages[$random_index]}"
+          fi
+        fi
+        
+        # Send the message using curl
+        response=$(curl -s -w "\n%{http_code}" -X POST https://api.groupme.com/v3/bots/post \
+          -H "Content-Type: application/json" \
+          -d "{\"bot_id\": \"$GROUPME_BOT_ID\", \"text\": \"$message\"}")
+        
+        http_code=$(echo "$response" | tail -n1)
+        body=$(echo "$response" | sed '$d')
+        
+        if [ "$http_code" -eq 202 ]; then
+          echo "✅ Message sent successfully: $message"
+        else
+          echo "❌ Failed to send message. HTTP Status: $http_code"
+          echo "Response: $body"
+          exit 1
+        fi
+    
+    - name: Log success
+      if: success()
+      run: |
+        echo "Message sent at $(date)"
+        echo "Next scheduled runs:"
+        echo "- Tuesday at random time between 12:00 PM - 3:00 PM EST"
+        echo "- Thursday at random time between 12:00 PM - 3:00 PM EST"
+        echo "- Friday at random time between 12:00 PM - 3:00 PM EST"
+        echo "- Saturday at 3:30 PM EST (test message)"

@@ -1,0 +1,43 @@
+name: Send Test Message
+
+on:
+  # Allows manual triggering from the Actions tab
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Message to send to GroupMe'
+        required: true
+        default: 'Test message from Thomas Bot!'
+
+jobs:
+  send-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Send message to GroupMe
+      env:
+        GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
+      run: |
+        message="${{ github.event.inputs.message }}"
+        
+        # Send the message using curl
+        response=$(curl -s -w "\n%{http_code}" -X POST https://api.groupme.com/v3/bots/post \
+          -H "Content-Type: application/json" \
+          -d "{\"bot_id\": \"$GROUPME_BOT_ID\", \"text\": \"$message\"}")
+        
+        http_code=$(echo "$response" | tail -n1)
+        body=$(echo "$response" | sed '$d')
+        
+        if [ "$http_code" -eq 202 ]; then
+          echo "✅ Message sent successfully: $message"
+          echo "Check your GroupMe group for the message!"
+        else
+          echo "❌ Failed to send message. HTTP Status: $http_code"
+          echo "Response: $body"
+          echo ""
+          echo "Troubleshooting:"
+          echo "1. Make sure GROUPME_BOT_ID is set in repository secrets"
+          echo "2. Verify the Bot ID is correct"
+          echo "3. Check that the bot still exists in GroupMe developer portal"
+          exit 1
+        fi
