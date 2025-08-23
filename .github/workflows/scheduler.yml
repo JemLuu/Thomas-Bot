@@ -36,20 +36,6 @@ jobs:
       env:
         GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
       run: |
-        # Array of messages to rotate through
-        messages=(
-          "Happy Tuesday! 🎉 Let's make today productive and positive!"
-          "Thursday vibes! 💪 You're doing great, keep pushing forward!"
-          "It's Friday! 🎊 Almost weekend - finish strong!"
-          "Good morning! ☀️ Today is full of possibilities!"
-          "Rise and shine! 🌟 Let's conquer the day together!"
-          "Another beautiful day to achieve greatness! 🚀"
-          "Hey team! 👋 Hope everyone has an amazing day!"
-          "Midweek motivation! 💫 You've got this!"
-          "Happy Friday! 🥳 Weekend is almost here!"
-          "Tuesday energy! ⚡ Let's tackle those goals!"
-        )
-        
         # Get day of week (2=Tuesday, 4=Thursday, 5=Friday, 6=Saturday)
         day_of_week=$(date +%u)
         
@@ -63,28 +49,23 @@ jobs:
         
         # Select message based on day
         if [ "$day_of_week" -eq 2 ]; then
-          # Tuesday messages
-          random_index=$((RANDOM % ${#messages[@]}))
-          message="${messages[$random_index]}"
+          # Tuesday message
+          message="Practice tonight at 7:30!"
         elif [ "$day_of_week" -eq 4 ]; then
-          # Thursday messages
-          random_index=$((RANDOM % ${#messages[@]}))
-          message="${messages[$random_index]}"
+          # Thursday message
+          message="Practice tonight at 7:30!"
         elif [ "$day_of_week" -eq 5 ]; then
-          # Friday messages
-          random_index=$((RANDOM % ${#messages[@]}))
-          message="${messages[$random_index]}"
+          # Friday message
+          message="Practice tonight at 6:30!"
         elif [ "$day_of_week" -eq 6 ]; then
           # Saturday test message
           message="Saturday test message! 🧪 Bot is working correctly!"
         else
           # Default message (for manual runs)
-          # Use custom message if provided, otherwise use a random one
           if [ -n "${{ github.event.inputs.message }}" ]; then
             message="${{ github.event.inputs.message }}"
           else
-            random_index=$((RANDOM % ${#messages[@]}))
-            message="${messages[$random_index]}"
+            message="Hello from Thomas Bot!"
           fi
         fi
         

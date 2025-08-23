@@ -34,20 +34,12 @@ if (!BOT_ID) {
 
 const scheduledTimes = new Map();
 
-const messages = [
-  "Happy Tuesday! 🎉 Let's make today productive and positive!",
-  "Thursday vibes! 💪 You're doing great, keep pushing forward!",
-  "It's Friday! 🎊 Almost weekend - finish strong!",
-  "Good morning! ☀️ Today is full of possibilities!",
-  "Rise and shine! 🌟 Let's conquer the day together!",
-  "Another beautiful day to achieve greatness! 🚀",
-  "Hey team! 👋 Hope everyone has an amazing day!",
-  "Midweek motivation! 💫 You've got this!",
-  "Happy Friday! 🥳 Weekend is almost here!",
-  "Tuesday energy! ⚡ Let's tackle those goals!"
-];
-
-let messageIndex = 0;
+const dayMessages = {
+  Tuesday: "Practice tonight at 7:30!",
+  Thursday: "Practice tonight at 7:30!",
+  Friday: "Practice tonight at 6:30!",
+  Saturday: "Saturday test message! 🧪 Bot is working correctly!"
+};
 
 async function sendMessage(text) {
   const url = 'https://api.groupme.com/v3/bots/post';
@@ -81,20 +73,14 @@ async function sendMessage(text) {
   }
 }
 
-function getNextMessage() {
-  const message = messages[messageIndex];
-  messageIndex = (messageIndex + 1) % messages.length;
-  return message;
-}
-
-async function sendScheduledMessage() {
-  const message = getNextMessage();
-  logger.info('Attempting to send scheduled message...');
+async function sendScheduledMessage(dayName) {
+  const message = dayMessages[dayName] || "Hello from Thomas Bot!";
+  logger.info(`Attempting to send ${dayName} message: "${message}"`);
   
   const success = await sendMessage(message);
   
   if (!success) {
-    logger.warn('Failed to send message, will retry on next schedule');
+    logger.warn('Failed to send message, will retry in 1 minute');
     
     setTimeout(async () => {
       logger.info('Retrying message send...');
@@ -113,11 +99,12 @@ function scheduleRandomMessage(dayOfWeek, dayName) {
   const { hour, minute } = getRandomTimeInRange(START_HOUR, END_HOUR);
   const cronExpression = `${minute} ${hour} * * ${dayOfWeek}`;
   
-  logger.info(`Scheduling ${dayName} message for ${hour}:${minute.toString().padStart(2, '0')} ${TIMEZONE}`);
+  logger.info(`Scheduling ${dayName} message for ${hour}:${minute.toString().padStart(2, '0')} EST`);
+  logger.info(`Message will be: "${dayMessages[dayName]}"`);
   
   const task = cron.schedule(cronExpression, async () => {
     logger.info(`Executing ${dayName} scheduled message at ${hour}:${minute.toString().padStart(2, '0')}`);
-    await sendScheduledMessage();
+    await sendScheduledMessage(dayName);
     
     scheduleRandomMessage(dayOfWeek, dayName);
   }, {
@@ -191,8 +178,7 @@ const saturdayTestCron = '30 15 * * 6';
 logger.info('Scheduling Saturday test message at 3:30 PM EST');
 cron.schedule(saturdayTestCron, async () => {
   logger.info('Executing Saturday test message at 3:30 PM EST');
-  const testMessage = "Saturday test message! 🧪 Bot is working correctly!";
-  await sendMessage(testMessage);
+  await sendScheduledMessage('Saturday');
 }, {
   scheduled: true,
   timezone: TIMEZONE
