@@ -5,8 +5,6 @@ on:
     # Runs at random times between 12:00 PM and 3:00 PM EST on Tuesday, Thursday, Friday
     # We'll run at 12:00 PM EST (5:00 PM UTC) and pick a random delay
     - cron: '0 17 * * 2,4,5'
-    # Saturday test message at 3:30 PM EST (8:30 PM UTC)
-    - cron: '30 20 * * 6'
   
   # Allows manual triggering from the Actions tab
   workflow_dispatch:
@@ -36,7 +34,7 @@ jobs:
       env:
         GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
       run: |
-        # Get day of week (2=Tuesday, 4=Thursday, 5=Friday, 6=Saturday)
+        # Get day of week (2=Tuesday, 4=Thursday, 5=Friday)
         day_of_week=$(date +%u)
         
         # For Tuesday, Thursday, Friday - add random delay between 0-3 hours
@@ -57,9 +55,6 @@ jobs:
         elif [ "$day_of_week" -eq 5 ]; then
           # Friday message
           message="Practice tonight at 6:30!"
-        elif [ "$day_of_week" -eq 6 ]; then
-          # Saturday test message
-          message="Saturday test message! 🧪 Bot is working correctly!"
         else
           # Default message (for manual runs)
           if [ -n "${{ github.event.inputs.message }}" ]; then
@@ -93,4 +88,3 @@ jobs:
         echo "- Tuesday at random time between 12:00 PM - 3:00 PM EST"
         echo "- Thursday at random time between 12:00 PM - 3:00 PM EST"
         echo "- Friday at random time between 12:00 PM - 3:00 PM EST"
-        echo "- Saturday at 3:30 PM EST (test message)"

@@ -37,8 +37,7 @@ const scheduledTimes = new Map();
 const dayMessages = {
   Tuesday: "Practice tonight at 7:30!",
   Thursday: "Practice tonight at 7:30!",
-  Friday: "Practice tonight at 6:30!",
-  Saturday: "Saturday test message! 🧪 Bot is working correctly!"
+  Friday: "Practice tonight at 6:30!"
 };
 
 async function sendMessage(text) {
@@ -131,8 +130,7 @@ app.get('/health', (req, res) => {
     next_scheduled_times: {
       Tuesday: scheduledTimes.get('Tuesday') || 'Not scheduled yet',
       Thursday: scheduledTimes.get('Thursday') || 'Not scheduled yet',
-      Friday: scheduledTimes.get('Friday') || 'Not scheduled yet',
-      Saturday: '15:30 (3:30 PM) - Test message'
+      Friday: scheduledTimes.get('Friday') || 'Not scheduled yet'
     }
   });
 });
@@ -174,15 +172,6 @@ scheduleRandomMessage(2, 'Tuesday');
 scheduleRandomMessage(4, 'Thursday');
 scheduleRandomMessage(5, 'Friday');
 
-const saturdayTestCron = '30 15 * * 6';
-logger.info('Scheduling Saturday test message at 3:30 PM EST');
-cron.schedule(saturdayTestCron, async () => {
-  logger.info('Executing Saturday test message at 3:30 PM EST');
-  await sendScheduledMessage('Saturday');
-}, {
-  scheduled: true,
-  timezone: TIMEZONE
-});
 
 const server = app.listen(PORT, () => {
   logger.info(`Thomas Bot is running on port ${PORT}`);
