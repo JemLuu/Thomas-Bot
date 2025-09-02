@@ -2,7 +2,7 @@ name: Send GroupMe Messages
 
 on:
   schedule:
-    # Runs at random times between 12:00 PM and 3:00 PM EST on Tuesday, Thursday, Friday
+    # Runs at random times between 12:00 PM and 12:05 PM EST on Tuesday, Thursday, Friday
     # We'll run at 12:00 PM EST (5:00 PM UTC) and pick a random delay
     - cron: '0 17 * * 2,4,5'
   
@@ -37,10 +37,10 @@ jobs:
         # Get day of week (2=Tuesday, 4=Thursday, 5=Friday)
         day_of_week=$(date +%u)
         
-        # For Tuesday, Thursday, Friday - add random delay between 0-3 hours
+        # For Tuesday, Thursday, Friday - add random delay between 0-5 minutes
         if [ "$day_of_week" -eq 2 ] || [ "$day_of_week" -eq 4 ] || [ "$day_of_week" -eq 5 ]; then
-          # Generate random delay in seconds (0 to 10800 seconds = 0 to 3 hours)
-          random_delay=$((RANDOM % 10800))
+          # Generate random delay in seconds (0 to 300 seconds = 0 to 5 minutes)
+          random_delay=$((RANDOM % 300))
           echo "Waiting $random_delay seconds ($(($random_delay / 60)) minutes) for random scheduling..."
           sleep $random_delay
         fi
@@ -85,6 +85,6 @@ jobs:
       run: |
         echo "Message sent at $(date)"
         echo "Next scheduled runs:"
-        echo "- Tuesday at random time between 12:00 PM - 3:00 PM EST"
-        echo "- Thursday at random time between 12:00 PM - 3:00 PM EST"
-        echo "- Friday at random time between 12:00 PM - 3:00 PM EST"
+        echo "- Tuesday at random time between 12:00 PM - 12:05 PM EST"
+        echo "- Thursday at random time between 12:00 PM - 12:05 PM EST"
+        echo "- Friday at random time between 12:00 PM - 12:05 PM EST"

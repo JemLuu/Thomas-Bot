@@ -4,7 +4,7 @@ A simple GroupMe bot that automatically sends motivational messages every Tuesda
 
 ## Features
 
-- 📅 **Random scheduling**: Messages sent at random times between 12:00 PM - 3:00 PM EST on Tuesday, Thursday, Friday
+- 📅 **Random scheduling**: Messages sent at random times between 12:00 PM - 12:05 PM EST on Tuesday, Thursday, Friday
 - 🏐 **Practice reminders**: Automated reminders with practice times
 - 🔄 Automatic retry on failed messages
 - 📊 Health check endpoint for monitoring
@@ -118,7 +118,7 @@ Use GitHub's servers to run your bot on schedule - perfect for a message schedul
    - Check your GroupMe for the message!
 
 4. **That's It!**
-   - The bot will automatically send messages at random times between 12:00 PM - 3:00 PM EST on Tuesday, Thursday, and Friday
+   - The bot will automatically send messages at random times between 12:00 PM - 12:05 PM EST on Tuesday, Thursday, and Friday
    - To change the schedule, edit `.github/workflows/scheduler.yml`
    - Check the Actions tab to see run history
    - Completely free, runs on GitHub's servers forever!
@@ -186,9 +186,9 @@ Use GitHub's servers to run your bot on schedule - perfect for a message schedul
 ## Scheduling Details
 
 The bot automatically sends practice reminders on:
-- **Tuesday**: "Practice tonight at 7:30!" - sent at random time between 12:00 PM - 3:00 PM EST
-- **Thursday**: "Practice tonight at 7:30!" - sent at random time between 12:00 PM - 3:00 PM EST
-- **Friday**: "Practice tonight at 6:30!" - sent at random time between 12:00 PM - 3:00 PM EST
+- **Tuesday**: "Practice tonight at 7:30!" - sent at random time between 12:00 PM - 12:05 PM EST
+- **Thursday**: "Practice tonight at 7:30!" - sent at random time between 12:00 PM - 12:05 PM EST
+- **Friday**: "Practice tonight at 6:30!" - sent at random time between 12:00 PM - 12:05 PM EST
 
 Each day, the bot picks a new random time within the window, so messages appear more natural and less robotic. The random time is selected when the bot starts up and after each message is sent.
 
