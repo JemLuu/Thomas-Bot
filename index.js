@@ -22,13 +22,15 @@ const logger = winston.createLogger({
 });
 
 const BOT_ID = process.env.GROUPME_BOT_ID;
+const ACCESS_TOKEN = process.env.GROUPME_ACCESS_TOKEN;
+const GROUP_ID = process.env.GROUPME_GROUP_ID;
 const PORT = process.env.PORT || 3000;
 const TIMEZONE = 'America/New_York';
 const START_HOUR = parseInt(process.env.START_HOUR || '12', 10);
 const END_HOUR = parseInt(process.env.END_HOUR || '15', 10);
 
-if (!BOT_ID) {
-  logger.error('GROUPME_BOT_ID is not set in environment variables');
+if (!BOT_ID || !ACCESS_TOKEN || !GROUP_ID) {
+  logger.error('Required environment variables are not set: GROUPME_BOT_ID, GROUPME_ACCESS_TOKEN, GROUPME_GROUP_ID');
   process.exit(1);
 }
 
@@ -72,8 +74,70 @@ async function sendMessage(text) {
   }
 }
 
+async function getTodaysMessages() {
+  const url = `https://api.groupme.com/v3/groups/${GROUP_ID}/messages`;
+  
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTimestamp = Math.floor(today.getTime() / 1000);
+    
+    const response = await axios.get(url, {
+      params: {
+        token: ACCESS_TOKEN,
+        limit: 100
+      }
+    });
+    
+    if (response.status === 200 && response.data.response) {
+      const messages = response.data.response.messages || [];
+      const todaysMessages = messages.filter(msg => {
+        const msgTimestamp = msg.created_at;
+        return msgTimestamp >= todayTimestamp;
+      });
+      
+      logger.info(`Found ${todaysMessages.length} messages from today`);
+      return todaysMessages;
+    }
+    
+    return [];
+  } catch (error) {
+    logger.error(`Error fetching messages: ${error.message}`);
+    return [];
+  }
+}
+
+async function checkIfPracticeTimeMentioned() {
+  const messages = await getTodaysMessages();
+  
+  for (const msg of messages) {
+    if (msg.text && (msg.text.includes('7:30') || msg.text.includes('6:30'))) {
+      logger.info(`Found practice time mentioned by ${msg.name}`);
+      return {
+        mentioned: true,
+        userName: msg.name,
+        text: msg.text
+      };
+    }
+  }
+  
+  return { mentioned: false };
+}
+
 async function sendScheduledMessage(dayName) {
-  const message = dayMessages[dayName] || "Hello from Thomas Bot!";
+  const defaultMessage = dayMessages[dayName] || "Hello from Thomas Bot!";
+  
+  const practiceCheck = await checkIfPracticeTimeMentioned();
+  
+  let message;
+  if (practiceCheck.mentioned) {
+    message = `Yeah what ${practiceCheck.userName} said`;
+    logger.info(`Someone already mentioned practice time. Sending acknowledgment message.`);
+  } else {
+    message = defaultMessage;
+    logger.info(`No one mentioned practice time yet. Sending default message.`);
+  }
+  
   logger.info(`Attempting to send ${dayName} message: "${message}"`);
   
   const success = await sendMessage(message);
