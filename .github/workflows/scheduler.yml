@@ -33,6 +33,8 @@ jobs:
     - name: Send scheduled message
       env:
         GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
+        GROUPME_ACCESS_TOKEN: ${{ secrets.GROUPME_ACCESS_TOKEN }}
+        GROUPME_GROUP_ID: ${{ secrets.GROUPME_GROUP_ID }}
       run: |
         # Get day of week (2=Tuesday, 4=Thursday, 5=Friday)
         day_of_week=$(date +%u)
@@ -45,40 +47,8 @@ jobs:
           sleep $random_delay
         fi
         
-        # Select message based on day
-        if [ "$day_of_week" -eq 2 ]; then
-          # Tuesday message
-          message="Practice tonight at 7:30!"
-        elif [ "$day_of_week" -eq 4 ]; then
-          # Thursday message
-          message="Practice tonight at 7:30!"
-        elif [ "$day_of_week" -eq 5 ]; then
-          # Friday message
-          message="Practice tonight at 6:30!"
-        else
-          # Default message (for manual runs)
-          if [ -n "${{ github.event.inputs.message }}" ]; then
-            message="${{ github.event.inputs.message }}"
-          else
-            message="Hello from Thomas Bot!"
-          fi
-        fi
-        
-        # Send the message using curl
-        response=$(curl -s -w "\n%{http_code}" -X POST https://api.groupme.com/v3/bots/post \
-          -H "Content-Type: application/json" \
-          -d "{\"bot_id\": \"$GROUPME_BOT_ID\", \"text\": \"$message\"}")
-        
-        http_code=$(echo "$response" | tail -n1)
-        body=$(echo "$response" | sed '$d')
-        
-        if [ "$http_code" -eq 202 ]; then
-          echo "✅ Message sent successfully: $message"
-        else
-          echo "❌ Failed to send message. HTTP Status: $http_code"
-          echo "Response: $body"
-          exit 1
-        fi
+        # Run the Node.js script that checks for previous messages
+        node send-scheduled-message.js
     
     - name: Log success
       if: success()

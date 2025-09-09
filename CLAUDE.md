@@ -1,0 +1,1 @@
+- I will manually do testing and git commands. If you want to do specific commands, tell me what to do.
