@@ -139,8 +139,12 @@ async function sendScheduledMessage(dayName) {
   }
   
   logger.info(`Attempting to send ${dayName} message: "${message}"`);
-  
-  const success = await sendMessage(message);
+
+  // The bot will always say the default message
+  // If it is not the default message, it will only send 20% of the time
+  const success = (Math.random() > 0.8 || message == defaultMessage)
+    ? await sendMessage(message)
+    : (logger.info("Not sending the message, because it wasn't my lucky day"), true);
   
   if (!success) {
     logger.warn('Failed to send message, will retry in 1 minute');
